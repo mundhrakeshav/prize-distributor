@@ -32,7 +32,7 @@ contract PrizeDistributor is IPrizeDistributor {
     function claim( address _account, address _token, uint256 _amount, bytes32[] calldata _proof) external {
         if (hasClaimed[_account]) revert EAlreadyClaimed(); // revert if address has already claimed tokens
 
-        bytes32 _leaf = keccak256(abi.encodePacked(_account, _amount));
+        bytes32 _leaf = keccak256(abi.encodePacked(_account, _amount, _token));
         bool isValidLeaf = verify(_proof, _leaf); // Verify merkle proof,
         if (!isValidLeaf) revert ENotInMerkle(); // Revert if not in tree
         hasClaimed[_account] = true;

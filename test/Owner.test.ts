@@ -25,7 +25,7 @@ describe("Merkle Proof", function () {
     prize[user1.address] = getBigNumber("100").toString();
     prize[user2.address] = getBigNumber("1000").toString();
     prize[user3.address] = getBigNumber("10000").toString();
-    const generator = new Generator(prize)
+    const generator = new Generator(prize, erc20Token.address)
     
     const { merkleRoot, merkleTree } = generator.generate()    
 

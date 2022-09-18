@@ -27,7 +27,7 @@ describe("Merkle Proof", function () {
     prize[user3.address] = getBigNumber("10000").toString();
 
 
-    const generator = new Generator(prize)
+    const generator = new Generator(prize, erc20Token.address)
     const { merkleRoot, merkleTree } = generator.generate();
     await (await prizeDistributor.setMerkleRoot(merkleRoot)).wait()
 
@@ -44,7 +44,7 @@ describe("Merkle Proof", function () {
 
     it("User should be able to claim.", async function () {
       const { erc20Token, prizeDistributor, user1, prize, merkleTree } = await loadFixture(deployPrizeDistributorFixture);      
-      const leaf = generateLeaf(user1.address, prize[user1.address])      
+      const leaf = generateLeaf(user1.address, prize[user1.address], erc20Token.address)      
       const proof: string[] = merkleTree.getHexProof(leaf);
       await (await prizeDistributor.claim(user1.address, erc20Token.address, prize[user1.address], proof)).wait();
       expect(await erc20Token.balanceOf(user1.address)).to.equal(prize[user1.address]);
@@ -53,7 +53,7 @@ describe("Merkle Proof", function () {
 
     it("User should be able to claim only once.", async function () {
       const { erc20Token, prizeDistributor, user1, prize, merkleTree } = await loadFixture(deployPrizeDistributorFixture);      
-      const leaf = generateLeaf(user1.address, prize[user1.address])      
+      const leaf = generateLeaf(user1.address, prize[user1.address], erc20Token.address)      
       const proof: string[] = merkleTree.getHexProof(leaf);
       await (await prizeDistributor.claim(user1.address, erc20Token.address, prize[user1.address], proof)).wait();
       expect(await erc20Token.balanceOf(user1.address)).to.equal(prize[user1.address]);
@@ -63,7 +63,7 @@ describe("Merkle Proof", function () {
 
     it("User shouldn't be able to claim if proof incorrect.", async function () {
       const { erc20Token, prizeDistributor, user1, user2, prize, merkleTree } = await loadFixture(deployPrizeDistributorFixture);      
-      const leaf = generateLeaf(user1.address, prize[user2.address]) //! Incorrect Amt      
+      const leaf = generateLeaf(user1.address, prize[user2.address], erc20Token.address) //! Incorrect Amt      
       const proof: string[] = merkleTree.getHexProof(leaf);
       await expect(prizeDistributor.claim(user1.address, erc20Token.address, prize[user1.address], proof)).to.be.revertedWithCustomError(prizeDistributor, "ENotInMerkle");
     });

@@ -6,22 +6,24 @@ import { getAddress, solidityKeccak256 } from "ethers/lib/utils"; // Ethers util
 type AirdropRecipient = {
   address: string; 
   value: string;
+  token: string;
 };
 
 export default class Generator {
   recipients: AirdropRecipient[] = [];
 
-  constructor(airdrop: Record<string, string>) {
+  constructor(airdrop: Record<string, string>, token: string) {
     for (const [address, amount] of Object.entries(airdrop)) {
       this.recipients.push({
         address: getAddress(address),
-        value: amount
+        value: amount,
+        token
       });
     }
   }
 
-  generateLeaf(address: string, value: string): Buffer {
-    return Buffer.from(solidityKeccak256(["address", "uint256"], [address, value]).slice(2), "hex");
+  generateLeaf(address: string, value: string, token: string): Buffer {
+    return Buffer.from(solidityKeccak256(["address", "uint256", "address"], [address, value, token]).slice(2), "hex");
   }
 
   generate(): { merkleRoot: string, merkleTree: MerkleTree} {
@@ -29,8 +31,8 @@ export default class Generator {
     // Generate merkle tree
     const merkleTree = new MerkleTree(
       // Generate leafs
-      this.recipients.map(({ address, value }) =>
-        this.generateLeaf(address, value)
+      this.recipients.map(({ address, value, token }) =>
+        this.generateLeaf(address, value, token)
       ),
       keccak256,
       { sortPairs: true }
